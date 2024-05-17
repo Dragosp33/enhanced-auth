@@ -1,10 +1,15 @@
 'use client';
 
 import { LoginForm } from '@/components/auth/login-form';
-import React from 'react';
+import React, { Suspense } from 'react';
 
 const page = () => {
-  return <LoginForm />;
+  return (
+    <Suspense>
+      {' '}
+      <LoginForm />
+    </Suspense>
+  );
 };
 
 export default page;
