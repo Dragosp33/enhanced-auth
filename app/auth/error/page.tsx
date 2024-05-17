@@ -1,3 +1,5 @@
+'use client';
+
 import { ErrorCard } from '@/components/auth/error-card';
 
 const AuthErrorPage = () => {
