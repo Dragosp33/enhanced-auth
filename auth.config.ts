@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import type { NextAuthConfig } from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
 import Twitter from 'next-auth/providers/twitter';
 import Google from 'next-auth/providers/google';
+import GitHub from 'next-auth/providers/github';
 
 import { LoginSchema } from '@/lib/schemas';
 import { getUserByEmail } from '@/data/User';
@@ -14,9 +14,10 @@ const authConfig = {
       clientId: process.env.AUTH_GOOGLE_ID,
       allowDangerousEmailAccountLinking: true,
     }),
-    Twitter({
-      clientId: process.env.TWITTER_CONSUMER_KEY,
-      clientSecret: process.env.TWITTER_CONSUMER_SECRET,
+    GitHub({
+      clientSecret: process.env.GITHUB_SECRET,
+      clientId: process.env.GITHUB_ID,
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: {

@@ -45,10 +45,11 @@ const Docs = () => {
               <CollapsibleContent className='px-6 py-4 text-sm leading-relaxed'>
                 <p>
                   Current socials are supported ( can be modified based on your
-                  requirements)
+                  requirements).
                 </p>
                 <ul className='list-disc space-y-2 pl-6'>
-                  <li>Twitter</li>
+                  <li className='line-through decoration-pink-500'>Twitter</li>
+                  <li> Github </li>
                   <li>Google</li>
                 </ul>
                 <p className='italic mt-1'>
@@ -70,6 +71,11 @@ const Docs = () => {
                     Privacy policy{' '}
                   </Link>{' '}
                   page available
+                </p>
+                <p>
+                  {' '}
+                  For now twitter oauth does not support email, so I will use
+                  github instead.
                 </p>
               </CollapsibleContent>
             </Collapsible>
@@ -173,7 +179,7 @@ const Docs = () => {
                       {' '}
                       twitter{' '}
                     </Link>{' '}
-                    and
+                    ,
                     <Link
                       href='https://developers.google.com/'
                       target='blank'
@@ -181,7 +187,16 @@ const Docs = () => {
                     >
                       {' '}
                       Google{' '}
-                    </Link>
+                    </Link>{' '}
+                    , and{' '}
+                    <Link
+                      href='https://github.com/'
+                      target='blank'
+                      className='transition-colors  hover:underline hover:text-foreground/80 underline-offset-4'
+                    >
+                      {' '}
+                      Github{' '}
+                    </Link>{' '}
                   </li>
                   <li>
                     {' '}

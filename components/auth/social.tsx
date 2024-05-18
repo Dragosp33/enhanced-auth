@@ -2,7 +2,6 @@
 
 import { FcGoogle } from 'react-icons/fc';
 import { FaGithub, FaTwitter } from 'react-icons/fa';
-import { FaFacebook } from 'react-icons/fa';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +25,7 @@ export const GoogleSignInButton = () => {
       size='lg'
       className='w-full'
       variant='outline'
-      onClick={() => onClick('http://localhost:3000/profile')}
+      onClick={() => onClick(`${process.env.NEXTAUTH_URL}/settings`)}
     >
       <FcGoogle className='h-5 w-5' />
     </Button>
@@ -34,7 +33,7 @@ export const GoogleSignInButton = () => {
 };
 
 const Social = () => {
-  const onClick = (provider: 'google' | 'twitter', callbackUrl?: string) => {
+  const onClick = (provider: 'google' | 'github', callbackUrl?: string) => {
     console.log({ provider, callbackUrl });
     try {
       signIn(provider, {
@@ -59,9 +58,9 @@ const Social = () => {
         size='lg'
         className='w-full'
         variant='outline'
-        onClick={() => onClick('twitter')}
+        onClick={() => onClick('github')}
       >
-        <FaTwitter className='h-5 w-5' />
+        <FaGithub className='h-5 w-5' />
       </Button>
     </div>
   );
