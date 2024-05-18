@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 
 import { FcGoogle } from 'react-icons/fc';
-import { FaPlusCircle, FaUnlink } from 'react-icons/fa';
+import { FaGithub, FaPlusCircle, FaUnlink } from 'react-icons/fa';
 import { PlusIcon } from '@radix-ui/react-icons';
 import UnlinkButton from './unlink-acc-button';
 
@@ -46,6 +46,9 @@ export default async function AccountsTable() {
                 <CardContent className='px-1 md:p-6 md:pt-0 flex flex-row items-start'>
                   {acc.provider === 'google' && (
                     <FcGoogle className='flex h-5 w-5 translate-y-1 rounded-full mr-3' />
+                  )}
+                  {acc.provider === 'github' && (
+                    <FaGithub className='flex h-5 w-5 translate-y-1 rounded-full mr-3' />
                   )}
                   <div className='space-y-1 flex flex-row justiy-between w-full'>
                     <div className='flex-1'>
