@@ -17,9 +17,6 @@ import { sendChangeEmailsEmail, sendChangePassEmail } from '@/lib/mail';
 import { VerifyOTPToken } from './new-password';
 
 export const settings = async (values: z.infer<typeof SettingsSchema>) => {
-  console.log(
-    'SETTTTTTTTTTTTTTTTTTTTTTTTTTTINGSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS'
-  );
   const currentUser = await user();
 
   const verifiedValues = SettingsSchema.safeParse(values);
@@ -45,10 +42,7 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     delete verifiedValues.data.isTwoFactorEnabled;
   }
 
-  // check false at first.
-
   let identityCheck = false;
-
   // checks if the codes for email change are present. If so, try changing the email.
   // sets identity check to true if the codes are correct. This is helpful in order to not
   // request another code for the password, in case a user wants to change them both at one time.
@@ -71,27 +65,35 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
         return { error: verifyResult.error };
       }
       const verifiedTokens = verifyResult.token;
-      // we set the data.email to be verified tokens . newEmail, because a user might try to update that value after receiving the token
+      // we set the data.email to be verified tokens . newEmail, because a user might try to update that
+      // value after receiving the token
       verifiedValues.data.email = verifiedTokens?.newEmail;
       identityCheck = true;
     } else {
-      await generateChangeEmailToken(
+      const email_token = await generateChangeEmailToken(
         existingUser.email,
         verifiedValues.data.email
       );
+
+      await sendChangeEmailsEmail(
+        existingUser.email,
+        verifiedValues.data.email,
+        email_token.oldToken,
+        email_token.newToken
+      );
+
       return { emailChange: true };
     }
   }
-
   if (verifiedValues.data.oldPassword && verifiedValues.data.newPassword) {
-    // if identity is checked, there is no point in checking the password, so the verifiedValues stays the same.
+    // if identity is checked, there is no point in checking the password,
+    // so the verifiedValues stays the same.
     if (!identityCheck) {
       // check password here.
       const equal = await bcrypt.compare(
         verifiedValues.data.oldPassword,
         existingUser.password
       );
-
       if (!equal) {
         return { error: 'Password incorrect!' };
       }
@@ -109,27 +111,15 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
         return { error: OTPVerified.error };
       }
     }
-
-    // by doing early returns, if we get here, we know for sure that the validation is already made, so we can change the
-    // password.
+    // by doing early returns, if we get here, we know for sure that the validation
+    // is already made, so we can change the password.
     const hashedPassword = await bcrypt.hash(
       verifiedValues.data.newPassword,
       10
     );
     verifiedValues.data.newPassword = hashedPassword;
   }
-
-  // Here we start checking for the first time if email or passwords are changed, so we can send back a response
-  // requesting for OTP codes from email.
-
-  // and then verify the code from email , and then => update the user's password.:
-  // at first returnable has passcode and emailchange to false, so that if both password and email are changed
-  // in the settings page, a response containing both of them will be sent back.
-
-  console.log({ verifiedValues });
-
   const { newPassword, isTwoFactorEnabled, email, name } = verifiedValues.data;
-
   // update here
   const success = await updateUser(
     existingUser._id.toString(),
@@ -138,10 +128,8 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     email,
     name
   );
-
   if (!success) {
     return { error: 'Something went wrong...' };
   }
-
   return { success: 'Information updated.' };
 };

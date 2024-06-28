@@ -11,42 +11,6 @@ import { AuthOptions } from '@/auth';
 import { generateVerificationToken } from '@/lib/tokens';
 import { sendVerificationEmail } from '@/lib/mail';
 
-/*export const register = async (
-  values: z.infer<typeof RegisterSchema>,
-  callbackUrl?: string | null
-) => {
-  console.log('LOGS FROM REGISTER FUNC');
-  const validatedFields = RegisterSchema.safeParse(values);
-
-  if (!validatedFields.success) {
-    return { error: 'Invalid fields!' };
-  }
-
-  const { name, email, password } = validatedFields.data;
-  console.log(name, email, password);
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  return { success: 'Confirmation email sent!' };
-
-  /*const existingUser = await getUserByEmail(email);
-
-  if (!existingUser || !existingUser.email || !existingUser.password) {
-    return { error: 'Email does not exist!' };
-  }
-
-  if (!existingUser.emailVerified) {
-    const verificationToken = await generateVerificationToken(
-      existingUser.email
-    );
-
-    await sendVerificationEmail(
-      verificationToken.email,
-      verificationToken.token
-    );
-
-    return { success: 'Confirmation email sent!' };
-  } 
-};*/
-
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
 
@@ -65,12 +29,17 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   }
 
   // in register, we use the User schema defined by mongoose, to assure our needed fields.
-
+  let user;
   if (process.env.MONGODB_URI) {
     await mongoose.connect(process.env.MONGODB_URI);
 
     //if (!user) return null;
-    await User.create({ email: email, name: name, password: hashedPassword });
+    user = await User.create({
+      email: email,
+      name: name,
+      password: hashedPassword,
+    });
+    console.log(user);
   } else {
     return { error: 'Register is not opened yet. Please come back later.' };
   }
@@ -87,5 +56,5 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   }
   await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
-  return { success: 'Confirmation email sent!' };
+  return { success: 'Confirmation email sent!', id: user.id };
 };

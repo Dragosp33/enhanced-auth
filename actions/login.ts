@@ -20,6 +20,7 @@ import {
   deleteTwoFactorToken,
   getTwoFactorTokenByEmail,
 } from '@/data/two-factor-token';
+import bcrypt from 'bcryptjs';
 import { user } from '@/lib/auth';
 
 export const login = async (
@@ -30,7 +31,6 @@ export const login = async (
   if (alreadyLogged) {
     return { error: "Can't log in multiple times." };
   }
-  console.log('LOGS FROM LOGIN FUNC');
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -38,13 +38,11 @@ export const login = async (
   }
 
   const { email, password, code } = validatedFields.data;
-
   const existingUser = await getUserByEmail(email);
 
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: 'Email invalid!' };
   }
-
   if (!existingUser.emailVerified) {
     const verificationToken = await generateVerificationToken(
       existingUser.email
@@ -60,36 +58,40 @@ export const login = async (
   }
 
   //console.log(email, password);
-
+  let checkCode = '';
+  if (code) {
+    checkCode = code.trim();
+  }
   // 2FA CHECK HERE:
   if (existingUser.isTwoFactorEnabled && existingUser.email) {
-    if (code) {
-      //verify code;
+    if (checkCode) {
       const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
       if (!twoFactorToken) {
-        console.log('No 2FA code;');
         return { error: 'Invalid code!' };
       }
-      if (twoFactorToken.token !== code) {
-        console.log('2FA CODE INVALID');
+      if (twoFactorToken.token !== checkCode) {
         return { error: 'Invalid code!' };
       }
       const hasExpired = new Date(twoFactorToken.expires) < new Date();
       if (hasExpired) {
-        console.log('EXPIRED 2FA');
         return { error: 'Code expired. Please try logging in again.' };
       }
       await deleteTwoFactorToken(twoFactorToken.token);
-      // check and delete a 2fa confirmation:
       const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
         existingUser.id
       );
       if (twoFactorConfirmation) {
         await deleteTwoFactorConfirmation(existingUser.userId);
       }
-
       await createTwoFactorConfirmation(existingUser.id);
     } else {
+      const passwordMatch = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+      if (!passwordMatch) {
+        return { error: 'Wrong email or password.' };
+      }
       const twoFactorToken = await generateTwoFactorToken(existingUser.email);
       await sendTwoFactorEmail(twoFactorToken.email, twoFactorToken.token);
       return { twoFactor: true };
@@ -101,7 +103,6 @@ export const login = async (
     await signIn('credentials', {
       email,
       password,
-      //redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT  -- for callbacks, to be redirected to old page before login
       redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {

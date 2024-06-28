@@ -34,7 +34,6 @@ export default auth((req) => {
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    console.log('WATAFAK');
     return Response.redirect(new URL('/auth/login', nextUrl));
   }
   return;

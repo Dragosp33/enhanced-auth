@@ -110,7 +110,8 @@ export const {
   signOut,
 } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 60 * 60 * 24 * 7 },
+  jwt: { maxAge: 60 * 60 * 24 },
 
   ...authconfig,
 
@@ -230,7 +231,7 @@ export const {
             console.log('deleted user: ', toLinkUser, deleted);
           }
         } else {
-          // create account here.
+          // create account here linked to the user.
           if (AuthOptions.adapter.linkAccount && loggedIn.user.id && account) {
             AuthOptions.adapter.linkAccount({
               ...account,
@@ -265,9 +266,6 @@ export const {
           existingUser._id.toString()
         );
         if (!twoFactorConfirmation) {
-          console.log(
-            'AUTH FAILS BECAUSE THERE IS NO twoFactorConfirmation...'
-          );
           return false;
         }
 
@@ -278,7 +276,7 @@ export const {
       return true;
     },
     async session({ token, session, user }) {
-      //console.log({ sessionToken: token, session, user });
+      console.log({ token, session });
       if (token.sub) {
         session.user.id = token.sub;
       }
@@ -297,8 +295,6 @@ export const {
         session.user.name = token.name;
         session.user.email = token.email as string;
       }
-
-      //console.log({ modified: session });
       return session;
     },
     async jwt({ token, user, account }) {

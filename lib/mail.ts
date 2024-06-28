@@ -78,7 +78,7 @@ export const sendChangeEmailsEmail = async (
   const oldMailSent = resend.emails.send({
     from: 'no-reply-dpc@dragospolifronie.com',
     to: oldEmail,
-    subject: 'OTP Change Pass code',
+    subject: 'OTP Change email',
     html: `<div>
     <h1> You requested a one-time code to change your email </h1>
     <p>  Your OTP code is: ${oldToken}</p>
@@ -90,7 +90,7 @@ export const sendChangeEmailsEmail = async (
   const newMailSent = resend.emails.send({
     from: 'no-reply-dpc@dragospolifronie.com',
     to: newEmail,
-    subject: 'OTP Change Pass code',
+    subject: 'OTP Change email',
     html: `<div>
     <h1> OTP for email change </h1>
     <p>  Your OTP code is: ${newToken}</p>

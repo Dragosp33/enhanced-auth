@@ -36,7 +36,7 @@ export const NewVerification = async (token: string) => {
 
   await deleteVerificationToken(token);
   return success
-    ? { success: 'Your account has been verified.' }
+    ? { success: 'Your account has been verified.', id: existingUser.id }
     : {
         error:
           'It seems like an error occured. If this persists, contact support.',

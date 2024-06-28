@@ -25,6 +25,7 @@ export const RegisterForm = () => {
   const [error, setError] = useState<string | undefined>('');
   const [success, setSuccess] = useState<string | undefined>('');
   const [isPending, startTransition] = useTransition();
+  const [refferer, setRefferer] = useState<string>('');
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -43,6 +44,7 @@ export const RegisterForm = () => {
       register(values).then((data) => {
         setError(data.error);
         setSuccess(data.success);
+        setRefferer(data.id || '');
       });
     });
   };
@@ -50,8 +52,11 @@ export const RegisterForm = () => {
   return (
     <CardWrapper
       headerLabel='Create an account'
-      backButtonLabel='Already have an account?'
-      backButtonHref='/auth/login'
+      backButtonLabel={
+        refferer ? 'Already verified?' : 'Already have an account?'
+      } //edit here
+      backButtonHref={`/auth/login${refferer ? `?refferer=${refferer}` : ''}`}
+      //backButtonHref='/auth/login' //add referer
       showSocial
     >
       <Form {...form}>

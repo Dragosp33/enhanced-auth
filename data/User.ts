@@ -33,7 +33,7 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-export const getUserById = async (id?: string) => {
+export const getUserById = async (id?: string | null) => {
   if (!id) return null;
   try {
     const client = await clientPromise;
@@ -47,6 +47,20 @@ export const getUserById = async (id?: string) => {
   }
 };
 
+export const getUserEmailById = async (id?: string | null) => {
+  if (!id) return null;
+  try {
+    const client = await clientPromise;
+    const db = client.db(); // Use your database name
+    const uid = new mongoose.Types.ObjectId(id);
+    const user = await db.collection('users').findOne({ _id: uid });
+
+    if (!user) return null;
+    return user.email;
+  } catch {
+    return null;
+  }
+};
 /**
  * Verifies an user's email. It updates the verify date and, where is the case, the email address. ( The email is udpated when
  * an user wants to change their email, meaning the token contains the correct, new email)

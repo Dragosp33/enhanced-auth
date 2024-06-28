@@ -20,6 +20,7 @@ export const NewVerificationForm = () => {
   const token = params.get('token');
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
+  const [refferer, setRefferer] = useState<string>('');
 
   const onSubmit = useCallback(() => {
     if (success || error) return;
@@ -31,6 +32,7 @@ export const NewVerificationForm = () => {
     NewVerification(token)
       .then((data) => {
         setSuccess(data.success);
+        setRefferer(data.id);
         setError(data.error);
       })
       .catch(() => {
@@ -41,10 +43,11 @@ export const NewVerificationForm = () => {
   useEffect(() => {
     onSubmit();
   }, [onSubmit]);
+  console.log(refferer);
   return (
     <CardWrapper
       headerLabel='Confirming your token'
-      backButtonHref='/auth/login'
+      backButtonHref={`/auth/login${refferer ? `?refferer=${refferer}` : ''}`}
       backButtonLabel='Back to login'
     >
       <div className='flex items-center w-full justify-center'>

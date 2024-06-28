@@ -2,7 +2,7 @@
 
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -22,10 +22,13 @@ import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
 import { login } from '@/actions/login';
+import { getUserByEmail, getUserById, getUserEmailById } from '@/data/User';
 
 export const LoginForm = ({ modal }: { modal?: boolean }) => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
+  const refferer = searchParams.get('refferer');
+  const [email, setEmail] = useState<string>('');
   const urlError =
     searchParams.get('error') === 'OAuthAccountNotLinked'
       ? 'Email already in use with different provider!'
@@ -41,19 +44,34 @@ export const LoginForm = ({ modal }: { modal?: boolean }) => {
     defaultValues: {
       email: '',
       password: '',
+      code: '',
     },
   });
 
+  useEffect(() => {
+    const getEmail = async () => {
+      if (refferer) {
+        const userEmail = await getUserEmailById(refferer);
+        if (userEmail) {
+          setEmail(userEmail);
+          form.setValue('email', userEmail);
+        }
+      }
+    };
+
+    getEmail().catch(() => {
+      form.setValue('email', '');
+    });
+  });
+
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    console.log('VALUES: ', values);
     setError('');
     setSuccess('');
-
+    console.log({ showTwoFactor, isPending, success, error });
     startTransition(() => {
       login(values, callbackUrl)
         .then((data: any) => {
           if (data?.error) {
-            form.reset();
             setError(data.error);
           }
 
